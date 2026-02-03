@@ -68,36 +68,34 @@ TEMPLATES = [
 WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 
 import os
+# Force selection based on whether we are in a Railway/Production environment
+# We check for MYSQLHOST or RAILWAY_ENVIRONMENT
+IS_RAILWAY = os.environ.get('MYSQLHOST') or os.environ.get('RAILWAY_ENVIRONMENT')
 
-# Railway provides MYSQLHOST, so we use that to detect production
-if os.environ.get('MYSQLHOST'):
+if IS_RAILWAY:
+    # Production uses Railway's default naming (No underscores)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('MYSQLDATABASE', 'railway'),
-            'USER': os.environ.get('MYSQLUSER', 'root'),
+            'NAME': os.environ.get('MYSQLDATABASE'),
+            'USER': os.environ.get('MYSQLUSER'),
             'PASSWORD': os.environ.get('MYSQLPASSWORD'),
-            'HOST': os.environ.get('MYSQLHOST'),
+            'HOST': os.environ.get('MYSQLHOST'), # Standard Railway name
             'PORT': os.environ.get('MYSQLPORT', '3306'),
-            'OPTIONS': {
-                'charset': 'utf8mb4',
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
         }
     }
 else:
-    # Local Development Fallback
+    # Local reads from YOUR .env (With underscores, as you wrote them)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('MYSQL_DATABASE', default='HRMS_lite'),
-            'USER': config('MYSQL_USER', default='root'),
-            'PASSWORD': config('MYSQL_PASSWORD', default=''),
-            'HOST': config('MYSQL_HOST', default='127.0.0.1'),
-            'PORT': config('MYSQL_PORT', default='3306'),
+            'NAME': config('MYSQL_DATABASE'),
+            'USER': config('MYSQL_USER'),
+            'PASSWORD': config('MYSQL_PASSWORD'),
+            'HOST': config('MYSQL_HOST'),
+            'PORT': config('MYSQL_PORT'),
         }
     }
-
 
 # Common settings for all environments
 
