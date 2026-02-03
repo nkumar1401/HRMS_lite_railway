@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HRMS Lite{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-card-primary">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_employees }}</span>
+                <span class="stat-label">Total Employees</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-card-success">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_present }}</span>
+                <span class="stat-label">Present Today</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-card-warning">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_absent }}</span>
+                <span class="stat-label">Absent Today</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-card-info">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ attendance_rate }}%</span>
+                <span class="stat-label">Attendance Rate</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="action-cards">
+            <a href="{% url 'hrms:employee_add' %}" class="action-card">
+                <div class="action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </div>
+                <span class="action-text">Add Employee</span>
+            </a>
+            <a href="{% url 'hrms:attendance_add' %}" class="action-card">
+                <div class="action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <span class="action-text">Mark Attendance</span>
+            </a>
+            <a href="{% url 'hrms:employee_list' %}" class="action-card">
+                <div class="action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <span class="action-text">View Employees</span>
+            </a>
+            <a href="{% url 'hrms:attendance_list' %}" class="action-card">
+                <div class="action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <span class="action-text">Attendance Records</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Employees -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Employees</h3>
+                <a href="{% url 'hrms:employee_list' %}" class="card-link">View All →</a>
+            </div>
+            <div class="card-body">
+                {% if recent_employees %}
+                <ul class="employee-list">
+                    {% for employee in recent_employees %}
+                    <li class="employee-item">
+                        <div class="employee-avatar">
+                            {{ employee.full_name|slice:":1"|upper }}
+                        </div>
+                        <div class="employee-info">
+                            <span class="employee-name">{{ employee.full_name }}</span>
+                            <span class="employee-department">{{ employee.department|default:"No Department" }}</span>
+                        </div>
+                        <span class="employee-id">{{ employee.employee_id }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                    <p>No employees yet</p>
+                    <a href="{% url 'hrms:employee_add' %}" class="btn btn-primary btn-sm">Add First Employee</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent Attendance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Attendance</h3>
+                <a href="{% url 'hrms:attendance_list' %}" class="card-link">View All →</a>
+            </div>
+            <div class="card-body">
+                {% if recent_attendance %}
+                <ul class="attendance-list">
+                    {% for record in recent_attendance %}
+                    <li class="attendance-item">
+                        <div class="attendance-employee">
+                            <div class="employee-avatar small">
+                                {{ record.employee.full_name|slice:":1"|upper }}
+                            </div>
+                            <span class="employee-name">{{ record.employee.full_name }}</span>
+                        </div>
+                        <span class="attendance-date">{{ record.date|date:"M d, Y" }}</span>
+                        <span class="status-badge {% if record.status == 'present' %}status-present{% else %}status-absent{% endif %}">
+                            {{ record.get_status_display }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <p>No attendance records yet</p>
+                    <a href="{% url 'hrms:attendance_add' %}" class="btn btn-primary btn-sm">Mark Attendance</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Weekly Summary -->
+    <div class="weekly-summary">
+        <h2 class="section-title">This Week's Summary</h2>
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-icon success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-value">{{ week_present }}</span>
+                    <span class="summary-label">Present Records</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-value">{{ week_absent }}</span>
+                    <span class="summary-label">Absent Records</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

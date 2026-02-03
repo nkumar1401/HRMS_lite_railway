@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - HRMS Lite{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>{{ title }}</h2>
+            <p>Fill in the details below to add a new employee to the system.</p>
+        </div>
+
+        <form method="post" id="employeeForm" class="form" novalidate>
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Employee ID -->
+                <div class="form-group">
+                    <label for="employee_id" class="form-label">
+                        Employee ID <span class="required">*</span>
+                    </label>
+                    {{ form.employee_id }}
+                    {% if form.employee_id.errors %}
+                    <span class="error-message">{{ form.employee_id.errors.0 }}</span>
+                    {% endif %}
+                    <span class="error-message" id="employee_id_error"></span>
+                </div>
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="full_name" class="form-label">
+                        Full Name <span class="required">*</span>
+                    </label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                    <span class="error-message">{{ form.full_name.errors.0 }}</span>
+                    {% endif %}
+                    <span class="error-message" id="full_name_error"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        Email Address <span class="required">*</span>
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <span class="error-message">{{ form.email.errors.0 }}</span>
+                    {% endif %}
+                    <span class="error-message" id="email_error"></span>
+                </div>
+
+                <!-- Department -->
+                <div class="form-group">
+                    <label for="department" class="form-label">
+                        Department
+                    </label>
+                    {{ form.department }}
+                    {% if form.department.errors %}
+                    <span class="error-message">{{ form.department.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'hrms:employee_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <span class="btn-text">{{ submit_text }}</span>
+                    <span class="btn-loading" style="display: none;">
+                        <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none"
+                                stroke-dasharray="31.4 31.4" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12"
+                                    dur="1s" repeatCount="indefinite" />
+                            </circle>
+                        </svg>
+                        Saving...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const form = document.getElementById('employeeForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Form validation
+    form.addEventListener('submit', function (e) {
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+            if (el.id) el.textContent = '';
+        });
+        document.querySelectorAll('.form-input').forEach(el => {
+            el.classList.remove('input-error');
+        });
+
+        // Validate Employee ID
+        const employeeId = document.getElementById('employee_id');
+        if (!employeeId.value.trim()) {
+            showError('employee_id', 'Employee ID is required');
+            isValid = false;
+        }
+
+        // Validate Full Name
+        const fullName = document.getElementById('full_name');
+        if (!fullName.value.trim()) {
+            showError('full_name', 'Full name is required');
+            isValid = false;
+        } else if (fullName.value.trim().length < 2) {
+            showError('full_name', 'Name must be at least 2 characters');
+            isValid = false;
+        }
+
+        // Validate Email
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.value.trim()) {
+            showError('email', 'Email address is required');
+            isValid = false;
+        } else if (!emailRegex.test(email.value.trim())) {
+            showError('email', 'Please enter a valid email address');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+
+        // Show loading state
+        submitBtn.querySelector('.btn-text').style.display = 'none';
+        submitBtn.querySelector('.btn-loading').style.display = 'flex';
+        submitBtn.disabled = true;
+    });
+
+    function showError(fieldId, message) {
+        const errorEl = document.getElementById(fieldId + '_error');
+        const inputEl = document.getElementById(fieldId);
+        if (errorEl) errorEl.textContent = message;
+        if (inputEl) inputEl.classList.add('input-error');
+    }
+
+    // Real-time validation
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('blur', function () {
+            validateField(this);
+        });
+
+        input.addEventListener('input', function () {
+            this.classList.remove('input-error');
+            const errorEl = document.getElementById(this.id + '_error');
+            if (errorEl) errorEl.textContent = '';
+        });
+    });
+
+    function validateField(field) {
+        const value = field.value.trim();
+
+        if (field.id === 'email' && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                showError('email', 'Please enter a valid email address');
+            }
+        }
+    }
+</script>
+{% endblock %}
+{% endblock %}

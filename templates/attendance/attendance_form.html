@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - HRMS Lite{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>{{ title }}</h2>
+            <p>Select an employee and mark their attendance for a specific date.</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}
+            <div class="error-alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {{ error }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" id="attendanceForm" class="form" novalidate>
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Employee Select -->
+                <div class="form-group full-width">
+                    <label for="employee" class="form-label">
+                        Employee <span class="required">*</span>
+                    </label>
+                    {{ form.employee }}
+                    {% if form.employee.errors %}
+                    <span class="error-message">{{ form.employee.errors.0 }}</span>
+                    {% endif %}
+                    <span class="error-message" id="employee_error"></span>
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label for="attendance_date" class="form-label">
+                        Date <span class="required">*</span>
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                    <span class="error-message">{{ form.date.errors.0 }}</span>
+                    {% endif %}
+                    <span class="error-message" id="attendance_date_error"></span>
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Status <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        {% for radio in form.status %}
+                        <label
+                            class="radio-label {% if radio.data.value == 'present' %}radio-success{% else %}radio-danger{% endif %}">
+                            {{ radio.tag }}
+                            <span class="radio-text">
+                                {% if radio.data.value == 'present' %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                    height="16">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                {% else %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                    height="16">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                {% endif %}
+                                {{ radio.choice_label }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.status.errors %}
+                    <span class="error-message">{{ form.status.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'hrms:attendance_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <span class="btn-text">{{ submit_text }}</span>
+                    <span class="btn-loading" style="display: none;">
+                        <svg class="spinner" viewBox="0 0 24 24" width="20" height="20">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none"
+                                stroke-dasharray="31.4 31.4" stroke-linecap="round">
+                                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12"
+                                    dur="1s" repeatCount="indefinite" />
+                            </circle>
+                        </svg>
+                        Saving...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const form = document.getElementById('attendanceForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function (e) {
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+            if (el.id) el.textContent = '';
+        });
+
+        // Validate Employee
+        const employee = document.getElementById('employee');
+        if (!employee.value) {
+            document.getElementById('employee_error').textContent = 'Please select an employee';
+            isValid = false;
+        }
+
+        // Validate Date
+        const date = document.getElementById('attendance_date');
+        if (!date.value) {
+            document.getElementById('attendance_date_error').textContent = 'Please select a date';
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+
+        // Show loading state
+        submitBtn.querySelector('.btn-text').style.display = 'none';
+        submitBtn.querySelector('.btn-loading').style.display = 'flex';
+        submitBtn.disabled = true;
+    });
+</script>
+{% endblock %}
+{% endblock %}

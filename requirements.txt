@@ -1,0 +1,17 @@
+# HRMS Lite - Requirements
+# Django 6.0.1 HR Management System
+
+# Core Framework
+Django>=5.0,<7.0
+
+# Database
+mysqlclient>=2.2.0
+
+# Configuration Management
+python-decouple>=3.8
+
+# Production Server
+gunicorn>=21.2.0
+
+# Static Files (Production)
+whitenoise>=6.6.0

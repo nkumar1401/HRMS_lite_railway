@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HRMS Lite - Human Resource Management System">
+    <title>{% block title %}HRMS Lite{% endblock %}</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </span>
+                <span class="logo-text">HRMS Lite</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="{% url 'hrms:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Employee Management</span>
+            </div>
+            
+            <a href="{% url 'hrms:employee_list' %}" class="nav-link {% if 'employee' in request.resolver_match.url_name %}active{% endif %}">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                </span>
+                <span class="nav-text">All Employees</span>
+            </a>
+            
+            <a href="{% url 'hrms:employee_add' %}" class="nav-link">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </span>
+                <span class="nav-text">Add Employee</span>
+            </a>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Attendance</span>
+            </div>
+            
+            <a href="{% url 'hrms:attendance_list' %}" class="nav-link {% if 'attendance' in request.resolver_match.url_name and request.resolver_match.url_name != 'attendance_add' %}active{% endif %}">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </span>
+                <span class="nav-text">Attendance Records</span>
+            </a>
+            
+            <a href="{% url 'hrms:attendance_add' %}" class="nav-link {% if request.resolver_match.url_name == 'attendance_add' %}active{% endif %}">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </span>
+                <span class="nav-text">Mark Attendance</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="app-version">v1.0.0</div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            
+            <div class="header-actions">
+                {% block header_actions %}{% endblock %}
+            </div>
+        </header>
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                <span>{{ message }}</span>
+                <button class="message-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Page Content -->
+        <div class="page-content">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Delete</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteItemName"></strong>?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

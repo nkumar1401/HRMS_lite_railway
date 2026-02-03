@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ object.full_name }} - HRMS Lite{% endblock %}
+{% block page_title %}Delete Employee{% endblock %}
+
+{% block content %}
+<div class="confirm-page">
+    <div class="confirm-card">
+        <div class="confirm-icon danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+
+        <h2>Delete Employee</h2>
+        <p>Are you sure you want to delete <strong>{{ object.full_name }}</strong>?</p>
+        <p class="text-muted">This will also delete all attendance records for this employee. This action cannot be
+            undone.</p>
+
+        <div class="employee-preview">
+            <div class="preview-row">
+                <span class="preview-label">Employee ID:</span>
+                <span class="preview-value">{{ object.employee_id }}</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Email:</span>
+                <span class="preview-value">{{ object.email }}</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Department:</span>
+                <span class="preview-value">{{ object.department|default:"—" }}</span>
+            </div>
+        </div>
+
+        <form method="post" class="confirm-actions">
+            {% csrf_token %}
+            <a href="{% url 'hrms:employee_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete Employee
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
