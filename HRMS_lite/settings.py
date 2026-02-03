@@ -80,7 +80,7 @@ if IS_RAILWAY:
             'NAME': os.environ.get('MYSQLDATABASE'),
             'USER': os.environ.get('MYSQLUSER'),
             'PASSWORD': os.environ.get('MYSQLPASSWORD'),
-            'HOST': os.environ.get('MYSQLHOST'), # Standard Railway name
+            'HOST': os.environ.get('mysql.railway.internal'), # Standard Railway name
             'PORT': os.environ.get('MYSQLPORT', '3306'),
         }
     }
