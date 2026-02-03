@@ -1,11 +1,9 @@
-# HRMS Lite - Requirements
-# Django HR Management System
-
 # Core Framework
 Django>=5.0,<7.0
 
 # Database
 PyMySQL>=1.1.0
+cryptography>=42.0.0  # Required for modern MySQL authentication
 dj-database-url>=2.1.0
 
 # Configuration
@@ -17,6 +15,6 @@ whitenoise>=6.6.0
 # Production Server
 gunicorn>=21.2.0
 
-# Build Safety (important for Railway)
+# Build Safety
 setuptools
 wheel
