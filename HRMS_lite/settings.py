@@ -63,42 +63,50 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 import dj_database_url
+import os
 
-# Priority 1: Use MYSQL_URL if provided by Railway
-# Priority 2: Use DATABASE_URL if provided
-# Priority 3: Construct from individual Railway variables (MYSQLHOST, etc.)
-# Priority 4: Fallback to local .env or defaults
-db_url = config('MYSQL_URL', default=config('DATABASE_URL', default=None))
+# Database
+# Priority 1: Use MYSQL_URL (Railway)
+# Priority 2: Use DATABASE_URL (Standard)
+# Priority 3: Use individual MYSQL* variables (Railway)
+# Priority 4: Use local variables (Decouple)
+
+mysql_url = os.environ.get('MYSQL_URL')
+if not mysql_url and os.environ.get('MYSQLHOST'):
+    # Manually construct URL from Railway individual variables
+    user = os.environ.get('MYSQLUSER')
+    password = os.environ.get('MYSQLPASSWORD')
+    host = os.environ.get('MYSQLHOST')
+    port = os.environ.get('MYSQLPORT')
+    database = os.environ.get('MYSQLDATABASE')
+    mysql_url = f"mysql://{user}:{password}@{host}:{port}/{database}"
+
+db_url = mysql_url or os.environ.get('DATABASE_URL')
 
 if db_url:
     DATABASES = {
         'default': dj_database_url.parse(db_url)
     }
 else:
+    # Fallback to decouple (Local)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('MYSQLDATABASE', default=config('DB_NAME', default='HRMS_lite')),
-            'USER': config('MYSQLUSER', default=config('DB_USER', default='root')),
-            'PASSWORD': config('MYSQLPASSWORD', default=config('DB_PASSWORD', default='')),
-            'HOST': config('MYSQLHOST', default=config('DB_HOST', default='localhost')),
-            'PORT': config('MYSQLPORT', default=config('DB_PORT', default='3306')),
+            'NAME': config('DB_NAME', default='HRMS_lite'),
+            'USER': config('DB_USER', default='root'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='3306'),
         }
     }
 
-# Ensure the engine is set correctly for mysql
+# Common settings for all environments
 DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
-
-# Django 5.x+ requires some extra settings for MySQL
 DATABASES['default']['OPTIONS'] = {
     'charset': 'utf8mb4',
     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
 }
-# Set conn_max_age for better performance
 DATABASES['default']['CONN_MAX_AGE'] = 600
 
 
