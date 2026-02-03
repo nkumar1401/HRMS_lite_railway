@@ -71,13 +71,22 @@ IS_PROD = os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('MYSQL_URL')
 if IS_PROD:
     # PROD: Railway environment
     db_url = os.environ.get('MYSQL_URL')
+    
+    print("\n--- RAILWAY DATABASE DIAGNOSTICS ---")
+    print(f"RAILWAY_ENVIRONMENT: {os.environ.get('RAILWAY_ENVIRONMENT')}")
+    print(f"MYSQL_URL present: {'Yes' if db_url else 'No'}")
+    print(f"MYSQLHOST: {os.environ.get('MYSQLHOST')}")
+    print(f"MYSQLPORT: {os.environ.get('MYSQLPORT')}")
+    print(f"MYSQLDATABASE: {os.environ.get('MYSQLDATABASE')}")
+    print(f"MYSQLUSER: {os.environ.get('MYSQLUSER')}")
+    print(f"------------------------------------\n")
+
     if db_url:
         DATABASES = {'default': dj_database_url.parse(db_url)}
     else:
-        # Fallback to individual vars if MYSQL_URL is missing
+        # Construct from individual vars
         DATABASES = {
             'default': {
-                'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ.get('MYSQLDATABASE') or os.environ.get('MYSQL_DATABASE', 'HRMS_lite'),
                 'USER': os.environ.get('MYSQLUSER') or os.environ.get('MYSQL_USER', 'root'),
                 'PASSWORD': os.environ.get('MYSQLPASSWORD') or os.environ.get('MYSQL_PASSWORD', ''),
@@ -89,21 +98,20 @@ else:
     # LOCAL: Use decouple to read .env
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
             'NAME': config('MYSQL_DATABASE', default=config('DB_NAME', default='HRMS_lite')),
             'USER': config('MYSQL_USER', default=config('DB_USER', default='root')),
             'PASSWORD': config('MYSQL_PASSWORD', default=config('DB_PASSWORD', default='')),
-            'HOST': config('MYSQL_HOST', default=config('DB_HOST', default='127.0.0.1')), # Use IP to avoid localhost issues
+            'HOST': config('MYSQL_HOST', default=config('DB_HOST', default='127.0.0.1')), # Use IP
             'PORT': config('MYSQL_PORT', default=config('DB_PORT', default='3306')),
         }
     }
 
-# Safety check: Ensure the connection dictionary has a HOST
-if 'HOST' not in DATABASES['default'] or not DATABASES['default']['HOST']:
-    DATABASES['default']['HOST'] = '127.0.0.1'
-
-# Common settings for all environments
+# Explicitly set the Engine for all environments to ensure PyMySQL is used via monkeypatch
 DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+
+# Safety check: Ensure HOST is never None
+if not DATABASES['default'].get('HOST'):
+    DATABASES['default']['HOST'] = '127.0.0.1'
 DATABASES['default']['OPTIONS'] = {
     'charset': 'utf8mb4',
     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
