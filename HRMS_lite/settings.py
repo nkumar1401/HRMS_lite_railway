@@ -63,52 +63,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 
-import os
+import dj_database_url
 
-# --- ENVIRONMENT & DATABASE DEBUG ---
-IS_PROD = os.environ.get('RAILWAY_ENVIRONMENT')
+# Database Configuration
+IS_PROD = os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('MYSQL_URL')
 
 if IS_PROD:
-    print("\n" + "="*40)
-    print("RUNNING IN PRODUCTION (RAILWAY)")
-    print("="*40)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('MYSQL_DATABASE') or os.environ.get('MYSQLDATABASE'),
-            'USER': os.environ.get('MYSQL_USER') or os.environ.get('MYSQLUSER'),
-            'PASSWORD': os.environ.get('MYSQL_PASSWORD') or os.environ.get('MYSQLPASSWORD'),
-            'HOST': os.environ.get('MYSQL_HOST') or os.environ.get('MYSQLHOST'),
-            'PORT': os.environ.get('MYSQL_PORT') or os.environ.get('MYSQLPORT', '3306'),
+    # PROD: Use dj-database-url to handle any connection string or individul vars
+    # Railway provides MYSQL_URL (priority) or individual MYSQL* variables
+    db_url = os.environ.get('MYSQL_URL')
+    if db_url:
+        DATABASES = {'default': dj_database_url.config(default=db_url)}
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.mysql',
+                'NAME': os.environ.get('MYSQL_DATABASE') or os.environ.get('MYSQLDATABASE'),
+                'USER': os.environ.get('MYSQL_USER') or os.environ.get('MYSQLUSER'),
+                'PASSWORD': os.environ.get('MYSQL_PASSWORD') or os.environ.get('MYSQLPASSWORD'),
+                'HOST': os.environ.get('MYSQL_HOST') or os.environ.get('MYSQLHOST'),
+                'PORT': os.environ.get('MYSQL_PORT') or os.environ.get('MYSQLPORT', '3306'),
+            }
         }
-    }
 else:
     # LOCAL: Use decouple to read .env
-    DB_NAME = config('MYSQL_DATABASE', default=config('DB_NAME', default='HRMS_lite'))
-    DB_USER = config('MYSQL_USER', default=config('DB_USER', default='root'))
-    DB_PASS = config('MYSQL_PASSWORD', default=config('DB_PASSWORD', default=''))
-    DB_HOST = config('MYSQL_HOST', default=config('DB_HOST', default='localhost'))
-    DB_PORT = config('MYSQL_PORT', default=config('DB_PORT', default='3306'))
-    
-    print("\n" + "!"*40)
-    print("DEBUG: LOCAL ENVIRONMENT DETECTED")
-    print(f"DATABASE: {DB_NAME}")
-    print(f"USER:     {DB_USER}")
-    print(f"HOST:     {DB_HOST}")
-    if not DB_PASS:
-        print("PASSWORD: [EMPTY] <--- THIS IS LIKELY THE CAUSE OF YOUR ERROR!")
-    else:
-        print(f"PASSWORD: [FOUND] (Length: {len(DB_PASS)})")
-    print("!"*40 + "\n")
-    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': DB_NAME,
-            'USER': DB_USER,
-            'PASSWORD': DB_PASS,
-            'HOST': DB_HOST,
-            'PORT': DB_PORT,
+            'NAME': config('MYSQL_DATABASE', default=config('DB_NAME', default='HRMS_lite')),
+            'USER': config('MYSQL_USER', default=config('DB_USER', default='root')),
+            'PASSWORD': config('MYSQL_PASSWORD', default=config('DB_PASSWORD', default='')),
+            'HOST': config('MYSQL_HOST', default=config('DB_HOST', default='localhost')),
+            'PORT': config('MYSQL_PORT', default=config('DB_PORT', default='3306')),
         }
     }
 

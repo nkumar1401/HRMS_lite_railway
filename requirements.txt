@@ -5,7 +5,8 @@
 Django>=5.0,<7.0
 
 # Database
-mysqlclient>=2.2.0
+PyMySQL>=1.1.0
+dj-database-url>=2.1.0
 
 # Configuration
 python-decouple>=3.8
