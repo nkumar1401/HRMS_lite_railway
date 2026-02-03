@@ -18,13 +18,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/topics/settings/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-_1!f2@+ctv^1&w3g!4*@#y(oi+6py5o_t_jf@#u1=)c$^6_ao7')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app', '.up.railway.app']
 
+# Essential for forms and admin login to work on Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -97,7 +102,7 @@ else:
             'NAME': 'HRMS_lite',
             'USER': config('MYSQL_USER'),
             'PASSWORD': config('MYSQL_PASSWORD'),
-            'HOST': '127.0.0.1',
+            'HOST': 'localhost',
             'PORT': '3306',
         }
     }
