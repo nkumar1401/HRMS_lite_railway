@@ -7,7 +7,7 @@ import os
 from decouple import config
 import pymysql
 
-pymysql.version_info = (1, 4, 6, "final", 0) # Fake the version for Django compatibility
+pymysql.version_info = (2, 2, 1, "final", 0) # Fake the version for Django compatibility
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
