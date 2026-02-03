@@ -66,20 +66,40 @@ WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('MYSQLDATABASE', default=config('DB_NAME', default='HRMS_lite')),
-        'USER': config('MYSQLUSER', default=config('DB_USER', default='root')),
-        'PASSWORD': config('MYSQLPASSWORD', default=config('DB_PASSWORD', default='')),
-        'HOST': config('MYSQLHOST', default=config('DB_HOST', default='localhost')),
-        'PORT': config('MYSQLPORT', default=config('DB_PORT', default='3306')),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+import dj_database_url
+
+# Priority 1: Use MYSQL_URL if provided by Railway
+# Priority 2: Use DATABASE_URL if provided
+# Priority 3: Construct from individual Railway variables (MYSQLHOST, etc.)
+# Priority 4: Fallback to local .env or defaults
+db_url = config('MYSQL_URL', default=config('DATABASE_URL', default=None))
+
+if db_url:
+    DATABASES = {
+        'default': dj_database_url.parse(db_url)
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('MYSQLDATABASE', default=config('DB_NAME', default='HRMS_lite')),
+            'USER': config('MYSQLUSER', default=config('DB_USER', default='root')),
+            'PASSWORD': config('MYSQLPASSWORD', default=config('DB_PASSWORD', default='')),
+            'HOST': config('MYSQLHOST', default=config('DB_HOST', default='localhost')),
+            'PORT': config('MYSQLPORT', default=config('DB_PORT', default='3306')),
+        }
+    }
+
+# Ensure the engine is set correctly for mysql
+DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+
+# Django 5.x+ requires some extra settings for MySQL
+DATABASES['default']['OPTIONS'] = {
+    'charset': 'utf8mb4',
+    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
 }
+# Set conn_max_age for better performance
+DATABASES['default']['CONN_MAX_AGE'] = 600
 
 
 # Password validation
