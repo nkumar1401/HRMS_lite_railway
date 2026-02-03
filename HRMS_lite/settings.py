@@ -66,29 +66,33 @@ WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 import dj_database_url
 import os
 
-# Database
-# Priority 1: Use MYSQL_URL (Railway)
-# Priority 2: Use DATABASE_URL (Standard)
-# Priority 3: Use individual MYSQL* variables (Railway)
-# Priority 4: Use local variables (Decouple)
+# Database Configuration
+# We check for Railway-specific markers to determine the environment
+MYSQL_URL = os.environ.get('MYSQL_URL')
+MYSQL_HOST = os.environ.get('MYSQLHOST')
 
-mysql_url = os.environ.get('MYSQL_URL')
-if not mysql_url and os.environ.get('MYSQLHOST'):
-    # Manually construct URL from Railway individual variables
-    user = os.environ.get('MYSQLUSER')
-    password = os.environ.get('MYSQLPASSWORD')
-    host = os.environ.get('MYSQLHOST')
-    port = os.environ.get('MYSQLPORT')
-    database = os.environ.get('MYSQLDATABASE')
-    mysql_url = f"mysql://{user}:{password}@{host}:{port}/{database}"
+print(f"DEBUG: MYSQL_URL present: {bool(MYSQL_URL)}")
+print(f"DEBUG: MYSQLHOST: {MYSQL_HOST}")
 
-db_url = mysql_url or os.environ.get('DATABASE_URL')
-
-if db_url:
+if MYSQL_URL:
+    print("DEBUG: Using MYSQL_URL for database connection.")
     DATABASES = {
-        'default': dj_database_url.parse(db_url)
+        'default': dj_database_url.parse(MYSQL_URL)
+    }
+elif MYSQL_HOST:
+    print(f"DEBUG: Using individual Railway variables. Host: {MYSQL_HOST}")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('MYSQLDATABASE'),
+            'USER': os.environ.get('MYSQLUSER'),
+            'PASSWORD': os.environ.get('MYSQLPASSWORD'),
+            'HOST': MYSQL_HOST,
+            'PORT': os.environ.get('MYSQLPORT', '3306'),
+        }
     }
 else:
+    print("DEBUG: No Railway database variables found. Falling back to local/config settings.")
     # Fallback to decouple (Local)
     DATABASES = {
         'default': {
