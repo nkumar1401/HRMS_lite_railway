@@ -70,33 +70,34 @@ WSGI_APPLICATION = 'HRMS_lite.wsgi.application'
 import os
 # Force selection based on whether we are in a Railway/Production environment
 # We check for MYSQLHOST or RAILWAY_ENVIRONMENT
-IS_RAILWAY = os.environ.get('MYSQLHOST') or os.environ.get('RAILWAY_ENVIRONMENT')
+import os
+
+# Robust check for Railway
+IS_RAILWAY = os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('MYSQLHOST')
 
 if IS_RAILWAY:
-    # Production uses Railway's default naming (No underscores)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ.get('MYSQLDATABASE'),
-            'USER': os.environ.get('MYSQLUSER'),
-            'PASSWORD': os.environ.get('MYSQLPASSWORD'),
-            'HOST': os.environ.get('mysql.railway.internal'), # Standard Railway name
+            'NAME': os.environ.get('MYSQLDATABASE', 'railway'),
+            'USER': os.environ.get('MYSQLUSER', 'root'),
+            'PASSWORD': os.environ.get('MYSQLPASSWORD', ''),
+            'HOST': os.environ.get('MYSQLHOST', '127.0.0.1'), # Default string prevents 'NoneType' error
             'PORT': os.environ.get('MYSQLPORT', '3306'),
         }
     }
 else:
-    # Local reads from YOUR .env (With underscores, as you wrote them)
+    # Your existing local config
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('MYSQL_DATABASE'),
+            'NAME': 'HRMS_lite',
             'USER': config('MYSQL_USER'),
             'PASSWORD': config('MYSQL_PASSWORD'),
-            'HOST': config('MYSQL_HOST'),
-            'PORT': config('MYSQL_PORT'),
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
         }
     }
-
 # Common settings for all environments
 
 # Password validation
